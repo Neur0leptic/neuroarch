@@ -1,0 +1,7 @@
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.opencode/
+src/
+pkg/
+*.pkg.tar.*
