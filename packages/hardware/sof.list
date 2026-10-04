@@ -1,0 +1,2 @@
+# Selected only when the live hardware has a bound SOF audio driver.
+sof-firmware

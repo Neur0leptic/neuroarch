@@ -1,0 +1,4 @@
+# Proprietary 580 branch for supported older NVIDIA GPUs; selected explicitly.
+nvidia-580xx-dkms
+nvidia-580xx-utils
+libva-nvidia-driver

@@ -1,0 +1,4 @@
+cachyos-keyring
+cachyos-mirrorlist
+# The baseline CachyOS pacman understands optimized package architectures.
+pacman

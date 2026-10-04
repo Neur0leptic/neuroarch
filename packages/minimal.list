@@ -1,0 +1,11 @@
+# Base system, installation/resume tools, network and package administration.
+base
+base-devel
+linux-firmware
+mkinitcpio
+dosfstools
+zsh
+neovim
+iwd
+pacman-contrib
+reflector

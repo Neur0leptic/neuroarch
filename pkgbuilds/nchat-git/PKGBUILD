@@ -1,0 +1,35 @@
+# Based on the AUR nchat-git packaging by johnjahi55@gmail.com.
+# Keep the three protocols used by the existing Arch installation enabled.
+pkgname=nchat-git
+pkgver=5.19.18
+pkgrel=1
+pkgdesc='Console chat client with Telegram, WhatsApp and Signal'
+arch=('x86_64')
+url='https://github.com/d99kris/nchat'
+license=('AGPL-3.0-or-later')
+depends=('file' 'ncurses' 'openssl' 'python' 'sqlite' 'zlib' 'libpng')
+makedepends=('cmake' 'git' 'go' 'gperf' 'ninja' 'rustup' 'clang' 'protobuf')
+provides=('nchat')
+conflicts=('nchat')
+options=('!debug')
+source=("nchat::git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd nchat
+    git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    export GOFLAGS="${GOFLAGS:-} -buildvcs=false"
+    cmake -S nchat -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_MANDIR=/usr/share/man \
+        -DHAS_TELEGRAM=ON -DHAS_WHATSAPP=ON -DHAS_SIGNAL=ON -DHAS_TESTS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 nchat/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

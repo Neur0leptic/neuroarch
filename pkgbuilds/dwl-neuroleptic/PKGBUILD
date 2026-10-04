@@ -1,0 +1,49 @@
+# ABI-compatible DWL source and live canonical dotfiles, matching Gentoo.
+pkgname=dwl-neuroleptic
+pkgver=0.9.pre
+pkgrel=1
+pkgdesc='DWL with the Neuroleptic desktop patch and IPC protocol'
+arch=('x86_64')
+url='https://codeberg.org/dwl/dwl'
+license=('CC0-1.0' 'GPL-3.0-or-later' 'MIT')
+depends=('wlroots0.20' 'libinput' 'wayland' 'libxkbcommon' 'pixman')
+makedepends=('wayland-protocols' 'pkgconf' 'git')
+provides=('dwl')
+conflicts=('dwl')
+_dwl=d41ecb745cc94fbb48e93af01f5fd5d0b2488945
+_dotfiles_source='branch=main'
+# The installer/update_dwl can resolve a single build to its synchronized commit.
+# Normal package rebuilds follow main; no recipe hash edits are required.
+if [[ -n ${DWL_DOTFILES_REF:-} ]]; then
+    [[ $DWL_DOTFILES_REF =~ ^[0-9a-f]{40}$ ]] || return 1
+    _dotfiles_source="commit=$DWL_DOTFILES_REF"
+fi
+source=("dwl-${_dwl}.tar.gz::https://codeberg.org/dwl/dwl/archive/${_dwl}.tar.gz"
+        "dotfiles::git+https://github.com/Neur0leptic/dotfiles.git#${_dotfiles_source}")
+# makepkg verifies VCS objects through Git; the immutable upstream tar keeps its checksum.
+sha512sums=('4e24d2f839e6390b66b397435ad5d827c55bf1b5f6e20cfe323bdd7795baf4f00c9a76aedf485eab445731b2ad4fd3f19e8318c0a22bdf8ff904ed35273442b7'
+            'SKIP')
+
+pkgver() {
+    printf '0.9.pre.r%s.g%s' "$(git -C dotfiles rev-list --count HEAD)" "$(git -C dotfiles rev-parse --short HEAD)"
+}
+
+prepare() {
+    cd dwl
+    patch -Np1 -i ../dotfiles/dot_config/dwl/patches/0001-neuroleptic.patch
+    cp ../dotfiles/dot_config/dwl/protocols/dwl-ipc-unstable-v2.xml protocols/
+}
+
+build() {
+    make -C dwl XWAYLAND= XLIBS= CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" dwl
+}
+
+package() {
+    make -C dwl DESTDIR="$pkgdir" PREFIX=/usr XWAYLAND= XLIBS= install
+    install -Dm644 dotfiles/dot_config/dwl/patches/0001-neuroleptic.patch "$pkgdir/usr/share/dwl/neurogentoo/desktop.patch"
+    install -Dm644 dotfiles/dot_config/dwl/protocols/dwl-ipc-unstable-v2.xml "$pkgdir/usr/share/dwl/neurogentoo/dwl-ipc-unstable-v2.xml"
+    git -C dotfiles rev-parse HEAD > dotfiles-revision
+    install -Dm644 dotfiles-revision "$pkgdir/usr/share/dwl/neurogentoo/dotfiles-revision"
+    install -Dm644 "$startdir/PKGBUILD" "$pkgdir/usr/share/dwl/neurogentoo/PKGBUILD"
+    install -Dm644 dwl/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
