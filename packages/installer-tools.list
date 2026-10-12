@@ -3,5 +3,6 @@ git
 curl
 openssh
 gnupg
+keyutils
 python
 jq
