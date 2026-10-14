@@ -45,6 +45,8 @@ xdg-desktop-portal-gtk
 xdg-utils
 xdg-user-dirs
 dconf
+catppuccin-cursors-mocha
+sound-theme-freedesktop
 fontconfig
 libarchive
 bluez

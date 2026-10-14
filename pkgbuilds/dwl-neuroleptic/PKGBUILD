@@ -1,7 +1,7 @@
 # ABI-compatible DWL source and live canonical dotfiles, matching Gentoo.
 pkgname=dwl-neuroleptic
 pkgver=0.9.pre
-pkgrel=1
+pkgrel=2
 pkgdesc='DWL with the Neuroleptic desktop patch and IPC protocol'
 arch=('x86_64')
 url='https://codeberg.org/dwl/dwl'
@@ -31,6 +31,14 @@ pkgver() {
 prepare() {
     cd dwl
     patch -Np1 -i ../dotfiles/dot_config/dwl/patches/0001-neuroleptic.patch
+    cp ../dotfiles/dot_config/dwl/config.def.h config.def.h
+    if [[ -n ${DWL_CONFIG_FILE:-} ]]; then
+        [[ -f $DWL_CONFIG_FILE && ! -L $DWL_CONFIG_FILE ]] || return 1
+        cp "$DWL_CONFIG_FILE" config.h
+    else
+        cp config.def.h config.h
+    fi
+    grep -qxF '#define DWL_CONFIG_VERSION 1' config.h || return 1
     cp ../dotfiles/dot_config/dwl/protocols/dwl-ipc-unstable-v2.xml protocols/
 }
 
@@ -41,6 +49,8 @@ build() {
 package() {
     make -C dwl DESTDIR="$pkgdir" PREFIX=/usr XWAYLAND= XLIBS= install
     install -Dm644 dotfiles/dot_config/dwl/patches/0001-neuroleptic.patch "$pkgdir/usr/share/dwl/neurogentoo/desktop.patch"
+    install -Dm644 dwl/config.h "$pkgdir/usr/share/dwl/neurogentoo/config.h"
+    install -Dm644 dwl/config.def.h "$pkgdir/usr/share/dwl/neurogentoo/default-config.h"
     install -Dm644 dotfiles/dot_config/dwl/protocols/dwl-ipc-unstable-v2.xml "$pkgdir/usr/share/dwl/neurogentoo/dwl-ipc-unstable-v2.xml"
     git -C dotfiles rev-parse HEAD > dotfiles-revision
     install -Dm644 dotfiles-revision "$pkgdir/usr/share/dwl/neurogentoo/dotfiles-revision"

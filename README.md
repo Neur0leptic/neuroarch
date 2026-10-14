@@ -19,4 +19,6 @@ installer's execution logic.
 
 This is a source and configuration repository, not a binary pacman repository.
 DWL uses the canonical patch and protocol from
-[dotfiles](https://github.com/Neur0leptic/dotfiles).
+[dotfiles](https://github.com/Neur0leptic/dotfiles). The installer seeds the user's
+editable `~/.local/src/dwl/config.h` once; native builds consume a copy through
+`DWL_CONFIG_FILE`. Local header edits do not require publication.
